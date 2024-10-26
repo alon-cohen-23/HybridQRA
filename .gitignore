@@ -1,0 +1,6 @@
+assertion.log
+.vscode/
+__pycache__/
+OpenAI_API/
+openai_usage.log
+.DS_Store
