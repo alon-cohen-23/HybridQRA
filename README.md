@@ -11,7 +11,7 @@ Below are the evaluation results:
 
 ![RAG Stats](./ESPN_RAG_STATS.png)
 
-# Critic llm - Optional
+# Critic LLM - Optional
 To ensure your answer's accuracy, you can use a critic LLM that will verify it. This is done by utilizing a specialized prompt with instructions and a few examples (few-shot learning) to check for common sense. You can choose whether to enable this feature in the config.yaml file. 
 
 # Getting Started
