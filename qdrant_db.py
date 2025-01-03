@@ -35,7 +35,8 @@ class Qdrant:
         client.recreate_collection(
             collection_name = collection_name,
             vectors_config=client.get_fastembed_vector_params(),
-            sparse_vectors_config=client.get_fastembed_sparse_vector_params() 
+            sparse_vectors_config=client.get_fastembed_sparse_vector_params(), 
+            on_disk_payload = True
         )
     
     def add_data_to_collection (self, input_files, chunk_size=qdrant_config['chunk_size']):
@@ -159,9 +160,7 @@ if __name__ =='__main__':
   
     
     search = HybridSearcher()
-    answer = search.basic_QA_chain("espn_stories", "")
-    print (answer)
-    print (type(answer['context']))
+   
    
     
     
