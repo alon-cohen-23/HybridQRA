@@ -156,7 +156,7 @@ class HybridSearcher ():
 if __name__ =='__main__':
 
     q = Qdrant("alon")
-    q.add_data_to_collection(["/Users/aloncohen/Documents/rag_project/data/espn/sample_espn.csv"])
+    q.add_data_to_collection(["data/espn/sample_espn.csv"])
   
     
     search = HybridSearcher()

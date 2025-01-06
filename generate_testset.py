@@ -115,22 +115,22 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
         
 
 if __name__ == '__main__':
-    ragas_df = llama_index_ragas_df(['/Users/aloncohen/Documents/rag_project/data/espn/espn_stories.csv'])
+    ragas_df = llama_index_ragas_df(['data/espn/espn_stories.csv'])
     
     
     espn_stories_qdrant = Qdrant("espn_stories")
-    espn_stories_qdrant.add_data_to_collection(['/Users/aloncohen/Documents/rag_project/data/espn/espn_stories.csv'])
+    espn_stories_qdrant.add_data_to_collection(['data/espn/espn_stories.csv'])
    
-    questions_df = pd.read_csv('/Users/aloncohen/Documents/rag_project/data/testsest/questions_testset.csv')
+    questions_df = pd.read_csv('data/testsest/questions_testset.csv')
     testset = rag_answers_to_ragas_questions(questions_df, "espn_stories")
     for index, row in testset.iterrows():
         print (row['answer'])
         print ('---------------')
     
-    testset.to_csv("/Users/aloncohen/Documents/rag_project/basic_answers.csv", index=False)
+    testset.to_csv("basic_answers.csv", index=False)
     print (testset)
     
     critic_llm_answers = apply_critic_llm_validation(testset)
-    critic_llm_answers.to_csv("/Users/aloncohen/Documents/rag_project/critic_llm_answers.csv")
+    critic_llm_answers.to_csv("critic_llm_answers.csv")
     print (critic_llm_answers['answer'])
     

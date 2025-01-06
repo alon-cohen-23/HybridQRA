@@ -14,7 +14,7 @@ import time
 
 
 # Load YAML configuration
-with open('/Users/aloncohen/Documents/rag_project/config.yaml', 'r') as config_file:
+with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 llama_index_docs_config = config['llama_index_docs']
@@ -224,7 +224,4 @@ def update_section_with_kwargs(section_config: dict, **kwargs) -> dict:
     
 if __name__ =='__main__':
 
-    df = pd.read_csv('/Users/aloncohen/Documents/rag_project/data/espn/sample_espn.csv')
-    docs = docs_list_from_df(df, metadata_fields=['site'])
-    for item in docs:
-        print (type(item.metadata))
+   
