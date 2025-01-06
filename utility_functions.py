@@ -222,6 +222,6 @@ def update_section_with_kwargs(section_config: dict, **kwargs) -> dict:
 
     return updated_section
     
-if __name__ =='__main__':
+
 
    

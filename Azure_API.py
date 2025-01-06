@@ -27,9 +27,9 @@ def llama_index_embedding_Connection(azure_deployment_embedding: str) -> AzureOp
     
     azure_embed_model = AzureOpenAIEmbedding(
         azure_deployment=azure_deployment_embedding, 
-        api_key = os.environ['AZURE_OPENAI_API_KEY2'],
-        azure_endpoint = os.environ['AZURE_OPENAI_ENDPOINT2'],
-        api_version = os.environ['AZURE_OPENAI_API_VERSION2'],
+        api_key = os.environ['AZURE_OPENAI_API_KEY'],
+        azure_endpoint = os.environ['AZURE_OPENAI_ENDPOINT'],
+        api_version = os.environ['AZURE_OPENAI_API_VERSION'],
     )
 
     return azure_embed_model

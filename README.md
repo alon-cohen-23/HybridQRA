@@ -32,6 +32,7 @@ To ensure your answer's accuracy, you can use a critic LLM that will verify it. 
     export AZURE_OPENAI_ENDPOINT="your_azure_endpoint"
     export AZURE_OPENAI_API_VERSION="your_api_version"
     export AZURE_OPENAI_CHAT_DEPLOYMENT_NAME="your_chat_deployment_name"
+    export AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME="your_embeddings_deployment_name"
     ```
 
 4. Modify `config.yaml` if necessary, to adjust settings such as the dense vector model, sparse vector model, LLM, number of top retrieved passages, re-ranked passages, and more.
