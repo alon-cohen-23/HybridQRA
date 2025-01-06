@@ -4,3 +4,4 @@ __pycache__/
 OpenAI_API/
 openai_usage.log
 .DS_Store
+.spyproject/
