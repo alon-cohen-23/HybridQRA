@@ -1,0 +1,2 @@
+faithfulness,answer_correctness,answer_relevancy,context_entity_recall,context_precision,context_recall,context_relevancy
+0.9277,0.7856,0.9611,0.6806,0.9184,0.9362,0.9228
