@@ -38,7 +38,7 @@ def llama_index_embedding_Connection(azure_deployment_embedding: str) -> AzureOp
 
 from openai import AzureOpenAI
 
-def OpenAI_API (messages: list, azure_deployment_model: str) -> str:
+def Azure_OpenAI_api (messages: list, azure_deployment_model: str) -> str:
     "connect to openai api and return the llm answer to the prompt (messages)"
     client = AzureOpenAI(
         azure_deployment = azure_deployment_model,
@@ -54,6 +54,13 @@ def OpenAI_API (messages: list, azure_deployment_model: str) -> str:
     return completion.choices[0].message.content
 
 
+def OpenAI_api (message: list, openai_deployment_model:str):
+    openai.api_key = os.getenv('OPENAI_API_KEY')
+    openai_deployment_model = openai_deployment_model
+    
+    response = openai.ChatCompletion.create(
+    model=openai_deployment_model, 
+    messages=messages
+    )
 
-
-
+    return (response.choices[0].message['content'])

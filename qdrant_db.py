@@ -1,5 +1,5 @@
 from utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
-from Azure_API import OpenAI_API
+from Azure_API import Azure_OpenAI_api
 
 from FlagEmbedding import FlagReranker
 from typing import List, Dict
@@ -22,8 +22,7 @@ sparse_model = qdrant_config['sparse_model']
 
 openai_config = config['openai']
 
-class Qdrant:
-     
+class Qdrant: 
     def __init__ (self, collection_name: str):
         "create a new Qdrant collection"
         self.collection_name = collection_name
@@ -145,7 +144,7 @@ class HybridSearcher ():
                    {"role": "user", "content": "Question: " + query},
                    {"role": "user", "content": "Contexts: " +contexts}]
         
-        answer = OpenAI_API(messages, llm)
+        answer = Azure_OpenAI_api(messages, llm)
         
         qa_dict = {'question': query, 'context': contexts, 'answer': answer}
         
@@ -155,13 +154,13 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
 
-    q = Qdrant("alon")
-    q.add_data_to_collection(["data/espn/sample_espn.csv"])
+   q = Qdrant("alon")
+   q.add_data_to_collection(["data/espn/sample_espn.csv"])
   
+   client = QdrantClient(url="http://localhost:6333")
+   
+   
     
-    search = HybridSearcher()
-   
-   
     
     
     
