@@ -75,9 +75,14 @@ def critic_llm_validation (row) -> str:
                 {"role": "user", "content": "generate an answer based on the instructions you got please : " + llm_input},
                      ]
     
-       
-    critic_answer = Azure_OpenAI_api(messages, openai_config['llm'])
-          
+    api_conn = openai_config['conn']
+    if api_conn == 'Azure_OpenAI': 
+        critic_answer = Azure_OpenAI_api(messages, openai_config['llm'])
+    elif api_conn == 'OpenAI':
+        OpenAI_api = OpenAI_api(messages, openai_config['llm'])
+    else:
+        raise ValueError ("Your api conn must be 'OpenAI' or 'Azure_OpenAI' depend on your key, please change it in the settings or through config.yaml.")
+        
     return critic_answer          
 
 def apply_critic_llm_validation (ragas_df) -> pd.DataFrame:
