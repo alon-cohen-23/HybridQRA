@@ -53,8 +53,9 @@ def Azure_OpenAI_api (messages: list, azure_deployment_model: str) -> str:
         )    
     return completion.choices[0].message.content
 
+import openai
 
-def OpenAI_api (message: list, openai_deployment_model:str):
+def OpenAI_api (messages: list, openai_deployment_model:str):
     openai.api_key = os.getenv('OPENAI_API_KEY')
     openai_deployment_model = openai_deployment_model
     

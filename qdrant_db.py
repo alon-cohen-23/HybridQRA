@@ -1,5 +1,5 @@
 from utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
-from Azure_API import Azure_OpenAI_api, OpenAI_api
+from OpenAI_api_conn import Azure_OpenAI_api, OpenAI_api
 
 from FlagEmbedding import FlagReranker
 from typing import List, Dict
@@ -147,9 +147,9 @@ class HybridSearcher ():
         
         api_conn = updated_config['conn']
         if api_conn == 'Azure_OpenAI': 
-            answer = Azure_OpenAI_api(messages, updated_config['llm'])
+            answer = Azure_OpenAI_api(messages, llm)
         elif api_conn == 'OpenAI':
-            answer = OpenAI_api(messages, updated_config['llm'])
+            answer = OpenAI_api(messages, llm)
         else:
             raise ValueError ("Your api conn must be 'OpenAI' or 'Azure_OpenAI' depend on your key, please change it in the settings or through config.yaml.")
         

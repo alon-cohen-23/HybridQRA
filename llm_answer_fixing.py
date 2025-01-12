@@ -6,7 +6,7 @@ Created on Sat Aug 10 17:17:42 2024
 @author: aloncohen
 """
 
-from Azure_API import Azure_OpenAI_api
+from OpenAI_api_conn import Azure_OpenAI_api, OpenAI_api
 import pandas as pd
 import yaml
 
@@ -79,7 +79,7 @@ def critic_llm_validation (row) -> str:
     if api_conn == 'Azure_OpenAI': 
         critic_answer = Azure_OpenAI_api(messages, openai_config['llm'])
     elif api_conn == 'OpenAI':
-        OpenAI_api = OpenAI_api(messages, openai_config['llm'])
+        critic_answer = OpenAI_api(messages, openai_config['llm'])
     else:
         raise ValueError ("Your api conn must be 'OpenAI' or 'Azure_OpenAI' depend on your key, please change it in the settings or through config.yaml.")
         
