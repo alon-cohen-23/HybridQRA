@@ -6,7 +6,7 @@ Created on Sat Aug 10 17:17:42 2024
 @author: aloncohen
 """
 
-from Azure_API import OpenAI_API
+from Azure_API import Azure_OpenAI_api
 import pandas as pd
 import yaml
 
@@ -76,7 +76,7 @@ def critic_llm_validation (row) -> str:
                      ]
     
        
-    critic_answer = OpenAI_API(messages, openai_config['llm'])
+    critic_answer = Azure_OpenAI_api(messages, openai_config['llm'])
           
     return critic_answer          
 
