@@ -41,7 +41,7 @@ class Qdrant:
         )
         Qdrant.collections_input_files[collection_name] = []
     
-    def add_data_to_collection (self, input_files, chunk_size=qdrant_config['chunk_size']):
+    def add_data_to_collection (self, input_files: list[str], text_field: str, metadata_fields: list[str], chunk_size=qdrant_config['chunk_size']):
         """ add information to the collection based on the input files. 
         (see available types at the read_and_concatenate function)""" 
         
@@ -49,7 +49,7 @@ class Qdrant:
         #concat the input files and seperate it to the document text and metadata.
         df = read_and_concatenate(input_files)
         
-        index_dict = create_index_dict_from_df(df)
+        index_dict = create_index_dict_from_df(df, text_field, metadata_fields)
 
         client.add(
             collection_name=self.collection_name,
@@ -168,7 +168,9 @@ if __name__ =='__main__':
     
     df = read_and_concatenate(["data/espn/sample_espn.csv"])
     
-    index_dict = create_index_dict_from_df(df)
+    text_field = "paragraph_text"
+    metadata_fields = ['title','content_publish_date']
+    index_dict = create_index_dict_from_df(df, text_field, metadata_fields)
 
     client.add(
         collection_name="alon",
