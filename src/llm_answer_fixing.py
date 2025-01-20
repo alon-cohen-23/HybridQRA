@@ -19,7 +19,7 @@ config_path = repo_root / "config.yaml"
 with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-openai_config = config['openai']    
+llm_config = config['llm']    
 
 def critic_llm_validation (row) -> str:
     """
@@ -81,11 +81,11 @@ def critic_llm_validation (row) -> str:
                 {"role": "user", "content": "generate an answer based on the instructions you got please : " + llm_input},
                      ]
     
-    api_conn = openai_config['conn']
+    api_conn = llm_config['conn']
     if api_conn == 'Azure_OpenAI': 
-        critic_answer = Azure_OpenAI_api(messages, openai_config['llm'])
+        critic_answer = Azure_OpenAI_api(messages, llm_config['model'])
     elif api_conn == 'OpenAI':
-        critic_answer = OpenAI_api(messages, openai_config['llm'])
+        critic_answer = OpenAI_api(messages, llm_config['model'])
     else:
         raise ValueError ("Your api conn must be 'OpenAI' or 'Azure_OpenAI' depend on your key, please change it in the settings or through config.yaml.")
         

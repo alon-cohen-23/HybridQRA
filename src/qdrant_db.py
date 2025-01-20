@@ -23,7 +23,7 @@ client = QdrantClient(qdrant_config['client'])
 dense_model = qdrant_config['dense_model']
 sparse_model = qdrant_config['sparse_model']
 
-openai_config = config['openai']
+llm_config = config['llm']
 
 class Qdrant: 
     
@@ -137,11 +137,10 @@ class HybridSearcher ():
 
         """
         # Access openai configuration from YAML
-        openai_config = config['openai']
-        updated_config = update_section_with_kwargs(openai_config, **kwargs)
+        updated_config = update_section_with_kwargs(llm_config, **kwargs)
         
         basic_instructions = updated_config['basic_instructions']
-        llm = updated_config['llm']
+        llm = updated_config['model']
         
         
         contexts = self.search_with_rerank(collection_name, query)
