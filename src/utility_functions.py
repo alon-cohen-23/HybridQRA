@@ -9,25 +9,17 @@ Created on Tue Jul 23 21:23:19 2024
 import pandas as pd
 from llama_index.core import Document 
 from typing import List, Dict
-import yaml
 import time
 
 
-# Load YAML configuration
-with open('config.yaml', 'r') as config_file:
-    config = yaml.safe_load(config_file)
-
-llama_index_docs_config = config['llama_index_docs']
-
-def create_document_from_row (row, **kwargs) -> Document:
+def create_document_from_row (row, text_field: str, metadata_fields: List[str]) -> Document:
     """
 
     Parameters
     ----------
     row : A row from the espn stories df .
-    **kwargs : dict, available keys:
-        - metadata_fields: list, the fields that will be used for the metadata of the llama_index docs.
-        - text_field: str, the field that will be used for the text of the llama_index docs.
+    metadata_fields: list, the fields that will be used for the metadata of the llama_index docs.
+    text_field: str, the field that will be used for the text of the llama_index docs.
     
     Returns
     -------
@@ -35,50 +27,29 @@ def create_document_from_row (row, **kwargs) -> Document:
     the metadata is from the rest of the metadata_fields (see defult at extract_metadata_from_row).
 
     """
-    text_field = kwargs.get('text_field', llama_index_docs_config['text_field'])
     text = row[text_field]
-    
-    metadata_fields = kwargs.get('metadata_fields', llama_index_docs_config['metadata_fields'])
-    metadata = row[metadata_fields]
+    metadata = row[metadata_fields].to_dict()
     
     doc = Document(text=text, metadata=metadata)
     return doc
 
-def docs_list_from_df(df, **kwargs) ->List[Document]:
+def docs_list_from_df(df, text_field: str, metadata_fields: List[str], chunk_size=1000) ->List[Document]:
     "apply the create_document_from_row function to the whole df"
-    chunk_size = kwargs.get('chunk_size', llama_index_docs_config['chunk_size']) 
     
     docs_list = []
     for start in range(0, len(df), chunk_size):
         
         df_chunk = df[start:start + chunk_size]
         
-        chunk_docs_list = df_chunk.apply(lambda row: create_document_from_row(row, **kwargs), axis=1).tolist()
+        chunk_docs_list = df_chunk.apply(lambda row: create_document_from_row(row, text_field, chunk_size), axis=1).tolist()
         docs_list.extend(chunk_docs_list)
         time.sleep(5)
         
     return docs_list
 
-def extract_text_from_row (row, **kwargs) -> str:
-    "extract the text from the text_field, defult field is: paragraph_text"
-    
-    text_field = kwargs.get('text_field', llama_index_docs_config['text_field'])
-    text = row[text_field]
-    return text
 
 
-def extract_metadata_from_row(row, **kwargs) -> Dict:
-    """extract metadata from the metadata_fields, defult fields are:
-    ['title'] """
-    
-    metadata_fields = kwargs.get('metadata_fields', llama_index_docs_config['metadata_fields'])
-    metadata = row[metadata_fields]
-    
-    metadata = metadata.to_dict()
-    return metadata
-
-
-def create_index_dict_from_df (docs_df: pd.DataFrame()) -> Dict[str, List[str]]:
+def create_index_dict_from_df (docs_df: pd.DataFrame(), text_field: str, metadata_fields: List[str]) -> Dict[str, List[str]]:
     """
     
     Parameters
@@ -92,11 +63,8 @@ def create_index_dict_from_df (docs_df: pd.DataFrame()) -> Dict[str, List[str]]:
                             metadata: list of the metadata dictionaries that matches each document.
     """
     
-    documents = docs_df.apply(extract_text_from_row, axis=1)
-    documents = documents.to_list()
-    
-    metadata = docs_df.apply(extract_metadata_from_row, axis=1)
-    metadata = metadata.to_list()
+    documents = docs_df[text_field].to_list()
+    metadata = df[metadata_fields].apply(lambda row: row.to_dict(), axis=1).tolist()
     
     index_dict = {'documents': documents, 'metadata':metadata}
     
@@ -223,5 +191,10 @@ def update_section_with_kwargs(section_config: dict, **kwargs) -> dict:
     return updated_section
     
 
-
-   
+if __name__ == "__main__":
+    df = pd.read_csv("../data/espn/espn_stories.csv").head(5)
+    text_field = "paragraph_text"
+    metadata_fields = ['site', 'country', 'title', 'author', 'content_publish_date']
+    dictt = create_index_dict_from_df(df, text_field, metadata_fields)
+    print (dictt)
+    
