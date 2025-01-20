@@ -23,7 +23,9 @@ To ensure your answer's accuracy, you can use a critic LLM that will verify it. 
 
 2. Download the latest Qdrant image from DockerHub:
     ```bash
-    docker pull qdrant/qdrant
+    docker run -p 6333:6333 -p 6334:6334 \
+    -v $(pwd)/qdrant_storage:/qdrant/storage:z \
+    qdrant/qdrant
     ```
 
 3. Set up your environment variables to connect to the Azure OpenAI API:

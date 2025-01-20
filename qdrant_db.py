@@ -23,6 +23,8 @@ sparse_model = qdrant_config['sparse_model']
 openai_config = config['openai']
 
 class Qdrant: 
+    
+    collections_input_files = {}
     def __init__ (self, collection_name: str):
         "create a new Qdrant collection"
         self.collection_name = collection_name
@@ -31,12 +33,13 @@ class Qdrant:
         client.set_sparse_model(sparse_model)
         
         # config vectors to a specific collection
-        client.recreate_collection(
+        client.create_collection(
             collection_name = collection_name,
             vectors_config=client.get_fastembed_vector_params(),
             sparse_vectors_config=client.get_fastembed_sparse_vector_params(), 
             on_disk_payload = True
         )
+        Qdrant.collections_input_files[collection_name] = []
     
     def add_data_to_collection (self, input_files, chunk_size=qdrant_config['chunk_size']):
         """ add information to the collection based on the input files. 
@@ -55,7 +58,7 @@ class Qdrant:
             ids=tqdm(range(len(index_dict['documents']))),
             batch_size=chunk_size
         )  
-            
+        Qdrant.collections_input_files[self.collection_name].extend(input_files)
             
         
 reranker = FlagReranker(qdrant_config['reranker'], qdrant_config['reranker_use_fp16']) 
@@ -161,10 +164,32 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
 
-   q = Qdrant("alon")
-   q.add_data_to_collection(["data/espn/sample_espn.csv"])
+    q = Qdrant("alon")
+    
+    df = read_and_concatenate(["data/espn/sample_espn.csv"])
+    
+    index_dict = create_index_dict_from_df(df)
+
+    client.add(
+        collection_name="alon",
+        documents=index_dict['documents'],
+        metadata=index_dict['metadata'],
+    )  
+    
+    scroll_filter = None  # Define any filtering criteria if needed
+    batch_size = 100  # Number of points to retrieve per request
+    offset = None  # Starting point for scrolling
+    
+    response = client.scroll(
+        collection_name="alon",
+        limit=batch_size,
+        offset=offset,
+        )
+    print (len(response[0]))    
+
+   
   
-   client = QdrantClient(url="http://localhost:6333")
+   
    
    
     

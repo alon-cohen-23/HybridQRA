@@ -11,7 +11,6 @@ from qdrant_db import Qdrant, basic_QA_chain
 from qdrant_client import QdrantClient
 import yaml
 import os
-import re
 
 app = Flask(__name__)
 
@@ -29,17 +28,13 @@ sparse_model = qdrant_config['sparse_model']
 
 @app.route('/get_collections_names', methods=['GET'])
 def get_collections_names():
-    try:
-        collections = str(client.get_collections())
-        collection_names = re.findall(r"name='([^']+)'", collections)
-        return jsonify(collection_names), 200
-    
-    except ConnectionError as e:
-        # Catch connection issues with the Qdrant service
-        return jsonify({"error": str(e)}), 500    
-    except Exception as e:
-        # Catch all other exceptions and send a server error response
-        return jsonify({"error": "An internal server error occurred", "message": str(e)}), 500
+    response = list(Qdrant.collections_input_files)
+    return jsonify(response), 200
+
+@app.route('/get_files/<collection_name>', methods=['GET'])
+def get_collection_files(collection_name):
+    response = Qdrant.collections_input_files[collection_name]
+    return jsonify(response), 200
     
 
 @app.route('/create_collection', methods=['POST'])
@@ -97,7 +92,7 @@ def rag_answer ():
     query = data['query']
     
     try:
-        qa_result = qa_chain.basic_QA_chain(collection_name, query)
+        qa_result = basic_QA_chain(collection_name, query)
         return jsonify(qa_result), 200
 
     except KeyError as e:
@@ -110,8 +105,7 @@ def rag_answer ():
         # Catch all other errors and send a generic internal server error
         return jsonify({"error": "An internal server error occurred", "message": str(e)}), 500    
         
-@app.route('/compute_metrics', methods=['GET'])
-def compute_ragas_metrics ():
+
     
     
 if __name__ == '__main__':

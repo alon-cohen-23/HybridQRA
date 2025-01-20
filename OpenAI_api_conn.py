@@ -65,3 +65,51 @@ def OpenAI_api (messages: list, openai_deployment_model:str):
     )
 
     return (response.choices[0].message['content'])
+
+"""import cohere
+
+COHERE_API_KEY = os.environ['COHERE_API_KEY']
+co = cohere.ClientV2(api_key=COHERE_API_KEY)
+
+
+def cohere_api (documents:list, model="command-r-plus-08-2024" ):
+
+    # Add the user message
+    basic_instructions = "please answer the given question using only the given contexts."
+    message = "Where do the tallest penguins live?"
+    messages = [{"role": "system", "content": basic_instructions},
+                {"role": "user", "content": message}]
+    response = co.chat(
+        model=model,
+        messages=messages,
+        documents=documents,
+    )
+    return (response.message.content[0].text)
+
+
+
+# Retrieve the documents
+documents = [
+    {
+        "data": {
+            "title": "Tall penguins",
+            "snippet": "Emperor penguins are the tallest.",
+        }
+    },
+    {
+        "data": {
+            "title": "Penguin habitats",
+            "snippet": "Emperor penguins only live in Antarctica.",
+        }
+    },
+    {
+        "data": {
+            "title": "What are animals?",
+            "snippet": "Animals are different from plants.",
+        }
+    },
+]
+
+print (cohere_api(documents))"""
+
+
