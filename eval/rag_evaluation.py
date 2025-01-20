@@ -10,10 +10,16 @@ import pandas as pd
 import numpy as np
 import time
 import yaml
-
+from pathlib import Path
 from Azure_API import llama_index_llm_connection, llama_index_embedding_Connection
 
-with open('config.yaml', 'r') as config_file:
+
+
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
+
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 ragas_models_config = config['ragas_models']

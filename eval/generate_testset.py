@@ -17,7 +17,13 @@ from utility_functions import docs_list_from_df, read_and_concatenate, update_se
 from Azure_API import llama_index_llm_connection, llama_index_embedding_Connection
 from llm_answer_fixing import apply_critic_llm_validation
 
-with open('config.yaml', 'r') as config_file:
+from pathlib import Path
+
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
+
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 ragas_models_config = config['ragas_models']

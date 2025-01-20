@@ -7,10 +7,13 @@ import yaml
 from qdrant_client import QdrantClient
 from tqdm import tqdm
 
-#TODO : E5-large - dense model 
+from pathlib import Path
 
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
 
-with open('config.yaml', 'r') as config_file:
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 
@@ -163,10 +166,10 @@ class HybridSearcher ():
 
         
 if __name__ =='__main__':
-
+ 
     q = Qdrant("alon")
     
-    df = read_and_concatenate(["data/espn/sample_espn.csv"])
+    df = read_and_concatenate(["../data/espn/sample_espn.csv"])
     
     text_field = "paragraph_text"
     metadata_fields = ['title','content_publish_date']

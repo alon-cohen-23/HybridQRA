@@ -10,7 +10,13 @@ from OpenAI_api_conn import Azure_OpenAI_api, OpenAI_api
 import pandas as pd
 import yaml
 
-with open('config.yaml', 'r') as config_file:
+from pathlib import Path
+
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
+
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 openai_config = config['openai']    

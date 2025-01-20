@@ -64,7 +64,7 @@ def create_index_dict_from_df (docs_df: pd.DataFrame(), text_field: str, metadat
     """
     
     documents = docs_df[text_field].to_list()
-    metadata = df[metadata_fields].apply(lambda row: row.to_dict(), axis=1).tolist()
+    metadata = docs_df[metadata_fields].apply(lambda row: row.to_dict(), axis=1).tolist()
     
     index_dict = {'documents': documents, 'metadata':metadata}
     

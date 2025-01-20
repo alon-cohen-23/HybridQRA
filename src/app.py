@@ -11,13 +11,16 @@ from qdrant_db import Qdrant, basic_QA_chain
 from qdrant_client import QdrantClient
 import yaml
 import os
+from pathlib import Path
 
-app = Flask(__name__)
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
 
-# Load YAML configuration
-with open('config.yaml', 'r') as config_file:
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
+app = Flask(__name__)
 
 # Configure Qdrant client
 qdrant_config = config['qdrant']

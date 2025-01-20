@@ -6,7 +6,7 @@ Created on Thu Aug 15 18:51:53 2024
 @author: aloncohen
 """
 
-
+from pathlib import Path
 import yaml
 from qdrant_db import Qdrant
 from qdrant_client import QdrantClient
@@ -16,8 +16,11 @@ from rag_evaluation import df_evaluation_by_chunk
 from llm_answer_fixing import apply_critic_llm_validation
 
 
-# Load YAML configuration
-with open('config.yaml', 'r') as config_file:
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
+
+with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 
