@@ -6,3 +6,4 @@ openai_usage.log
 .DS_Store
 .spyproject/
 qdrant_storage/
+.env
