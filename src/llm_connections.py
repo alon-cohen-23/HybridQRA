@@ -3,8 +3,20 @@ from abc import ABC, abstractmethod
 from openai import AzureOpenAI
 import cohere
 from dotenv import load_dotenv
-
+import yaml 
+from src.utility_functions import update_section_with_kwargs
 load_dotenv()
+
+from pathlib import Path
+
+current_file = Path(__file__)
+repo_root = current_file.resolve().parent.parent
+config_path = repo_root / "config.yaml"
+
+with open(config_path, 'r') as config_file:
+    config = yaml.safe_load(config_file)
+
+llm_config = config['llm']
 
 # Abstract Strategy Interface
 class LLMStrategy(ABC):
@@ -45,16 +57,40 @@ class CohereStrategy(LLMStrategy):
         )
         return response.message.content[0].text.strip()
 
-# Context Class
-class LLMContext:
-    def __init__(self, strategy: LLMStrategy):
-        self.strategy = strategy
+class LLMClient:
+    def __init__(self, provider: str, **kwargs):
+        """
+        Initializes the LLM client based on the provider.
 
-    def set_strategy(self, strategy: LLMStrategy):
-        self.strategy = strategy
+        Args:
+            provider (str): The LLM provider ("azure_openai" or "cohere").
+            **kwargs: Additional arguments required for the specific provider.
+                For Azure OpenAI:
+                    - deployment_model (str): The deployment model name.
+                For Cohere:
+                    - model (str): The model name (default: "command-r-plus-08-2024").
+        """
+        
 
-    def get_response(self, messages: list) -> str:
+        if provider == "azure_openai":
+            self.strategy = AzureOpenAIStrategy(kwargs.get("deployment_model", "gpt-4o-sim"))
+        elif provider == "cohere":
+            self.strategy = CohereStrategy(kwargs.get("model", "command-r-plus-08-2024"))
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
+
+    def generate_response(self, messages: list) -> str:
+        """
+        Generates a response using the selected LLM strategy.
+
+        Args:
+            messages (list): List of messages to send to the LLM.
+
+        Returns:
+            str: The generated response.
+        """
         return self.strategy.generate_response(messages)
+
 
 # Usage Example
 if __name__ == "__main__":
@@ -63,19 +99,9 @@ if __name__ == "__main__":
     {"role": "user", "content": "What is the capital of France?"}
     ]
 
-    # Using Azure OpenAI
-    azure_strategy = AzureOpenAIStrategy(deployment_model="gpt-4o-sim")
-    llm_context = LLMContext(strategy=azure_strategy)
-    print("Azure OpenAI Response:")
-    print(llm_context.get_response(messages))
-
+    client = LLMClient("azure_openai")
+    print (client.generate_response(messages))
     
-
-    # Switching to Cohere
-    cohere_strategy = CohereStrategy(model="command-r-plus-08-2024")
-    llm_context.set_strategy(cohere_strategy)
-    print("\nCohere Response:")
-    print(llm_context.get_response(messages))
     
 
    
