@@ -3,20 +3,10 @@ from abc import ABC, abstractmethod
 from openai import AzureOpenAI
 import cohere
 from dotenv import load_dotenv
-import yaml 
-from src.utility_functions import update_section_with_kwargs
+
+
 load_dotenv()
 
-from pathlib import Path
-
-current_file = Path(__file__)
-repo_root = current_file.resolve().parent.parent
-config_path = repo_root / "config.yaml"
-
-with open(config_path, 'r') as config_file:
-    config = yaml.safe_load(config_file)
-
-llm_config = config['llm']
 
 # Abstract Strategy Interface
 class LLMStrategy(ABC):
@@ -58,7 +48,7 @@ class CohereStrategy(LLMStrategy):
         return response.message.content[0].text.strip()
 
 class LLMClient:
-    def __init__(self, provider: str, **kwargs):
+    def __init__(self, provider: str, model):
         """
         Initializes the LLM client based on the provider.
 
@@ -73,9 +63,9 @@ class LLMClient:
         
 
         if provider == "azure_openai":
-            self.strategy = AzureOpenAIStrategy(kwargs.get("deployment_model", "gpt-4o-sim"))
+            self.strategy = AzureOpenAIStrategy(model)
         elif provider == "cohere":
-            self.strategy = CohereStrategy(kwargs.get("model", "command-r-plus-08-2024"))
+            self.strategy = CohereStrategy(model)
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
@@ -99,7 +89,7 @@ if __name__ == "__main__":
     {"role": "user", "content": "What is the capital of France?"}
     ]
 
-    client = LLMClient("azure_openai")
+    client = LLMClient("azure_openai", "gpt-4o-sim")
     print (client.generate_response(messages))
     
     
