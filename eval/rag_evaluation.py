@@ -11,7 +11,7 @@ import numpy as np
 import time
 import yaml
 from pathlib import Path
-from Azure_API import llama_index_llm_connection, llama_index_embedding_Connection
+from src.llama_index_llm import LLMServiceManager
 
 
 
@@ -22,11 +22,14 @@ config_path = repo_root / "config.yaml"
 with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-ragas_models_config = config['ragas_models']
+ragas_models_config = config['ragas']
 
-# set up llm, and embeddings to create the synthetic testset.    
-llm = llama_index_llm_connection(ragas_models_config['critic_llm'])   
-embeddings = llama_index_embedding_Connection(ragas_models_config['embeddings'])
+llama_index_azure_openai = LLMServiceManager("azure_openai", ragas_models_config['eval_llm'],
+                                             ragas_models_config['eval_embeddings'])
+
+# set up generator llm, critic llm and embeddings to create the synthetic testset.    
+llm = llama_index_azure_openai.llm
+embeddings = llama_index_azure_openai.embed_model
 
 
 
@@ -128,7 +131,7 @@ if __name__ =='__main__':
                'context_relevancy']
     
     
-    df = pd.read_csv('/Users/aloncohen/Documents/rag_project/data/testsest/critic_llm_answers.csv')
+    df = pd.read_csv('../data/testsest/critic_llm_answers_results.csv')
    
     eval_df = df_evaluation_by_chunk(df, metrics)
    
