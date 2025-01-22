@@ -36,18 +36,11 @@ def create_document_from_row (row, text_field: str, metadata_fields: List[str]) 
 def docs_list_from_df(df, text_field: str, metadata_fields: List[str], chunk_size=1000) ->List[Document]:
     "apply the create_document_from_row function to the whole df"
     
-    docs_list = []
-    for start in range(0, len(df), chunk_size):
-        
-        df_chunk = df[start:start + chunk_size]
-        
-        chunk_docs_list = df_chunk.apply(lambda row: create_document_from_row(row, text_field, chunk_size), axis=1).tolist()
-        docs_list.extend(chunk_docs_list)
-        time.sleep(5)
-        
+    docs_list = df.apply(
+        lambda row: create_document_from_row(row, text_field, metadata_fields)
+        , axis=1).to_list()
+    
     return docs_list
-
-
 
 def create_index_dict_from_df (docs_df: pd.DataFrame(), text_field: str, metadata_fields: List[str]) -> Dict[str, List[str]]:
     """
@@ -192,9 +185,9 @@ def update_section_with_kwargs(section_config: dict, **kwargs) -> dict:
     
 
 if __name__ == "__main__":
-    df = pd.read_csv("../data/espn/espn_stories.csv").head(5)
+    df = read_and_concatenate(['../data/espn/espn_stories.csv'])
     text_field = "paragraph_text"
     metadata_fields = ['site', 'country', 'title', 'author', 'content_publish_date']
-    dictt = create_index_dict_from_df(df, text_field, metadata_fields)
-    print (dictt)
     
+    docs_list = docs_list_from_df(df, text_field, metadata_fields)
+    print (len(docs_list))    
