@@ -21,6 +21,11 @@ To ensure your answer's accuracy, you can use a critic LLM that will verify it. 
     pip install -r requirements.txt
     ```
 
+2. Pull Qdrant image from docker
+    ```bash
+    docker pull qdrant/qdrant
+    ```
+    
 2. Download the latest Qdrant image from DockerHub:
     ```bash
     docker run -p 6333:6333 -p 6334:6334 \
