@@ -11,5 +11,5 @@ llama-index-llms-cohere
 llama-index-embeddings-cohere 
 flagembedding==1.2.10
 python-dotenv
-
+fastembed
 

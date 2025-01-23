@@ -10,7 +10,7 @@ from pathlib import Path
 import yaml
 from qdrant_db import Qdrant
 from qdrant_client import QdrantClient
-from utility_functions import update_section_with_kwargs
+from utils.utility_functions import update_section_with_kwargs
 from generate_testset import llama_index_ragas_df, rag_answers_to_ragas_questions
 from rag_evaluation import df_evaluation_by_chunk
 from llm_answer_fixing import apply_critic_llm_validation

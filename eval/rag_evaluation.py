@@ -131,13 +131,12 @@ if __name__ =='__main__':
                'context_relevancy']
     
     
-    df = pd.read_csv('../data/testsest/critic_llm_answers_results.csv')
+    df = pd.read_csv('../data/testsest/command-r-plus-08-2024_answers2.csv')
    
     eval_df = df_evaluation_by_chunk(df, metrics)
-   
-    eval_df.to_csv('critic_llm_answers_results.csv', index=False)
+    eval_df.to_csv('command-r-plus-08-2024_answers_results2.csv', index=False)
     
-    
+    print (eval_df[metrics].mean())
     
     
         
