@@ -13,8 +13,8 @@ import pandas as pd
 import yaml
 
 #from qdrant_db import HybridSearcher, Qdrant
-from src.utility_functions import docs_list_from_df, read_and_concatenate, update_section_with_kwargs
-from src.llama_index_llm import LLMServiceManager
+from src.utils.utility_functions import docs_list_from_df, read_and_concatenate, update_section_with_kwargs
+from src.llm_providers.llama_index_llm import LLMServiceManager
 from src.qdrant_db import HybridSearcher, QdrantCollectionManager
 
 from pathlib import Path

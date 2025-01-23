@@ -11,7 +11,7 @@ import numpy as np
 import time
 import yaml
 from pathlib import Path
-from src.llama_index_llm import LLMServiceManager
+from src.llm_providers.llama_index_llm import LLMServiceManager
 
 
 

@@ -1,8 +1,8 @@
 from utils.utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
-from src.llm_connections import LLMClient
+from src.llm_providers.llm_connections import LLMClient
 
 from FlagEmbedding import FlagReranker
-from typing import List, Dict, Optional
+from typing import List, Dict
 import yaml
 from qdrant_client import QdrantClient
 from tqdm import tqdm
