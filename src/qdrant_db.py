@@ -1,4 +1,4 @@
-from src.utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
+from utils.utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
 from src.llm_connections import LLMClient
 
 from FlagEmbedding import FlagReranker
@@ -82,7 +82,8 @@ class QdrantCollectionManager:
             metadata=index_dict['metadata'],
             batch_size=chunk_size
         )  
-        self.collections_input_files[collection_name].extend(input_files)
+        files_names = [file_path.split('/')[-1] for file_path in input_files]
+        self.collections_input_files[collection_name].extend(files_names)
         self._save_collections()
     
     def delete_collection(self, collection_name: str):
@@ -202,15 +203,19 @@ if __name__ =='__main__':
     q = QdrantCollectionManager()
     
     text_field = "paragraph_text"
-    metadata_fields = ['site', 'country', 'title', 'author', 'content_publish_date']
-    input_files = ['../data/espn/espn_stories.csv']
-    q.add_data_to_collection("alon", input_files, text_field, metadata_fields)
+    metadata_fields = ['title', 'content_publish_date']
+    input_files = ['../data/espn/sample_espn.csv']
+    q.create_collection("espn_stories")
+    q.add_data_to_collection("espn_stories", input_files, text_field, metadata_fields)
+    
+    searcher = HybridSearcher()
+    query = "How the celtics won NBA chip?"
+    print (searcher.QA_chain("espn_stories", query)['answer'])
     
     
-
    
   
-   
+    
    
    
     

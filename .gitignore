@@ -7,3 +7,4 @@ openai_usage.log
 .spyproject/
 qdrant_storage/
 .env
+*.log

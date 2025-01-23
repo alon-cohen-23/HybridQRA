@@ -15,7 +15,7 @@ import yaml
 #from qdrant_db import HybridSearcher, Qdrant
 from src.utility_functions import docs_list_from_df, read_and_concatenate, update_section_with_kwargs
 from src.llama_index_llm import LLMServiceManager
-#from llm_answer_fixing import apply_critic_llm_validation
+from src.qdrant_db import HybridSearcher, QdrantCollectionManager
 
 from pathlib import Path
 
@@ -26,17 +26,19 @@ config_path = repo_root / "config.yaml"
 with open(config_path, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-ragas_models_config = config['ragas_models']
+ragas_models_config = config['ragas']
 
-llama_index_cohere = LLMServiceManager("cohere", "command-r-plus-08-2024", "embed-english-v3.0")
-llama_index_azure_openai = LLMServiceManager("azure_openai", "gpt-4o-sim", "text-embedding-ada-002")
+llama_index_cohere = LLMServiceManager("cohere", ragas_models_config['generator_llm'],
+                    ragas_models_config['generator_embeddings'])
+llama_index_azure_openai = LLMServiceManager("azure_openai", ragas_models_config['critic_llm'],
+                    ragas_models_config['eval_embeddings'])
 
 # set up generator llm, critic llm and embeddings to create the synthetic testset.    
 generator_llm = llama_index_cohere.llm
 critic_llm = llama_index_azure_openai.llm
 embeddings = llama_index_cohere.embed_model
 
-def llama_index_ragas_df (input_files : list[str], text_field, metadata_fields, **kwargs) -> pd.DataFrame:
+def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fields, **kwargs) -> pd.DataFrame:
     """
     generates a synthetic testset using ragas API based on the data in the input files
     Parameters
@@ -81,13 +83,13 @@ def llama_index_ragas_df (input_files : list[str], text_field, metadata_fields, 
     
     df = testset.to_pandas()
     return df
-"""
+
 def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str) -> pd.DataFrame:
-    
+    """
     Parameters
     ----------
     ragas_df : Pandas df
-        Conteains the synthetic testset generated through ragas, that was created using the function llama_index_ragas_df.
+        Conteains the synthetic testset generated through ragas, that was created using the function create_synthetic_ragas_df.
     collection_name : str
         The name of the qdrant collection that contains all of your data.
 
@@ -95,7 +97,7 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
     -------
     testset_df : pd.DataFrame
         the ragas_df with the answers of my RAG.
-
+    """
     
     # crteate testset_df
     testset = {'question': [],
@@ -107,7 +109,7 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
     #Generate an answer to all of the questions from the ragas_df.
     engine = HybridSearcher()
     for index, row in ragas_df.iterrows():
-        answer = engine.basic_QA_chain(collection_name ,row['question'])
+        answer = engine.QA_chain(collection_name, row['question'])
         
         
         testset_row_details = {'question': row['question'],
@@ -120,28 +122,28 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
         testset_df = pd.concat([testset_df, testset_row_df], ignore_index=True)
     
     
-    return testset_df"""
+    return testset_df
        
 
 if __name__ == '__main__':
+    
     text_field = "paragraph_text"
-    metadata_fields = ['site', 'country', 'title', 'author', 'content_publish_date']
-    ragas_df = llama_index_ragas_df(['../data/espn/espn_stories.csv'], text_field, metadata_fields)
+    metadata_fields = ['title', 'content_publish_date']
+    input_files = ['../data/espn/espn_stories.csv']
+    
+    qdrant = QdrantCollectionManager()
+    qdrant.create_collection("espn_stories_collection")
+    qdrant.add_data_to_collection("espn_stories", input_files,
+                                  text_field, metadata_fields)
+    
+    print ("collection was loaded")
+    ragas_df_path = "../data/testsest/testset_questions.csv"
+    
+    ragas_df = pd.read_csv(ragas_df_path)
+    
+    testset_df = rag_answers_to_ragas_questions (ragas_df, "espn_stories")
+    testset_df.to_csv("../data/testsest/command-r-plus-08-2024_answers2.csv", index=False)
     
     
-    """espn_stories_qdrant = Qdrant("espn_stories")
-    espn_stories_qdrant.add_data_to_collection(['data/espn/espn_stories.csv'])
-   
-    questions_df = pd.read_csv('data/testsest/questions_testset.csv')
-    testset = rag_answers_to_ragas_questions(questions_df, "espn_stories")
-    for index, row in testset.iterrows():
-        print (row['answer'])
-        print ('---------------')
     
-    testset.to_csv("basic_answers.csv", index=False)
-    print (testset)
-    
-    critic_llm_answers = apply_critic_llm_validation(testset)
-    critic_llm_answers.to_csv("critic_llm_answers.csv")
-    print (critic_llm_answers['answer'])
-    """
+  
