@@ -1,13 +1,14 @@
-from utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
-from OpenAI_api_conn import Azure_OpenAI_api, OpenAI_api
+from src.utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
+from src.llm_connections import LLMClient
 
 from FlagEmbedding import FlagReranker
-from typing import List, Dict
+from typing import List, Dict, Optional
 import yaml
 from qdrant_client import QdrantClient
 from tqdm import tqdm
 
 from pathlib import Path
+import json
 
 current_file = Path(__file__)
 repo_root = current_file.resolve().parent.parent
@@ -22,46 +23,82 @@ qdrant_config = config['qdrant']
 client = QdrantClient(qdrant_config['client'])
 dense_model = qdrant_config['dense_model']
 sparse_model = qdrant_config['sparse_model']
+chunk_size = qdrant_config['chunk_size']
 
 llm_config = config['llm']
 
-class Qdrant: 
-    
-    collections_input_files = {}
-    def __init__ (self, collection_name: str):
-        "create a new Qdrant collection"
-        self.collection_name = collection_name
-        
-        client.set_model(dense_model)
-        client.set_sparse_model(sparse_model)
-        
-        # config vectors to a specific collection
-        client.create_collection(
-            collection_name = collection_name,
-            vectors_config=client.get_fastembed_vector_params(),
-            sparse_vectors_config=client.get_fastembed_sparse_vector_params(), 
-            on_disk_payload = True
-        )
-        Qdrant.collections_input_files[collection_name] = []
-    
-    def add_data_to_collection (self, input_files: list[str], text_field: str, metadata_fields: list[str], chunk_size=qdrant_config['chunk_size']):
-        """ add information to the collection based on the input files. 
-        (see available types at the read_and_concatenate function)""" 
-        
-        
-        #concat the input files and seperate it to the document text and metadata.
-        df = read_and_concatenate(input_files)
-        
-        index_dict = create_index_dict_from_df(df, text_field, metadata_fields)
 
-        client.add(
-            collection_name=self.collection_name,
+class QdrantCollectionManager:
+    _collections_file = 'qdrant_collections.json'
+    
+    def __init__(self):
+        self._client = client
+        self._dense_model = dense_model
+        self._sparse_model = sparse_model
+        self.collections_input_files = self._load_collections()
+    
+    def _load_collections(self) -> Dict[str, List[str]]:
+        """Load collections from persistent storage."""
+        try:
+            with open(self._collections_file, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+    
+    def _save_collections(self):
+        """Save collections to persistent storage."""
+        with open(self._collections_file, 'w') as f:
+            json.dump(self.collections_input_files, f)
+    
+    def create_collection(self, collection_name: str):
+        """Create a new Qdrant collection."""
+        self._client.set_model(self._dense_model)
+        self._client.set_sparse_model(self._sparse_model)
+        
+        self._client.create_collection(
+            collection_name=collection_name,
+            vectors_config=self._client.get_fastembed_vector_params(),
+            sparse_vectors_config=self._client.get_fastembed_sparse_vector_params(), 
+            on_disk_payload=True
+        )
+        self.collections_input_files[collection_name] = []
+        self._save_collections()
+    
+    def add_data_to_collection(
+        self, 
+        collection_name: str, 
+        input_files: List[str], 
+        text_field: str, 
+        metadata_fields: List[str], 
+        chunk_size = chunk_size
+    ):
+        
+        df = read_and_concatenate(input_files)
+        index_dict = create_index_dict_from_df(df, text_field, metadata_fields)
+        
+        self._client.add(
+            collection_name=collection_name,
             documents=index_dict['documents'],
             metadata=index_dict['metadata'],
-            ids=tqdm(range(len(index_dict['documents']))),
             batch_size=chunk_size
         )  
-        Qdrant.collections_input_files[self.collection_name].extend(input_files)
+        self.collections_input_files[collection_name].extend(input_files)
+        self._save_collections()
+    
+    def delete_collection(self, collection_name: str):
+        """Delete a collection and its associated files."""
+        del self.collections_input_files[collection_name]
+        self._client.delete_collection(collection_name=collection_name)
+        self._save_collections()
+    
+    def get_collections(self) -> List[str]:
+        """Retrieve all collection names."""
+        return list(self.collections_input_files.keys())
+    
+    def get_collection_files(self, collection_name: str) -> List[str]:
+        """Get input files for a specific collection."""
+        return self.collections_input_files[collection_name]
+    
             
         
 reranker = FlagReranker(qdrant_config['reranker'], qdrant_config['reranker_use_fp16']) 
@@ -115,7 +152,7 @@ class HybridSearcher ():
         return rellevant_contexts
       
     
-    def basic_QA_chain (self, collection_name: str, query: str, **kwargs) -> Dict[str, str]:
+    def QA_chain (self, collection_name: str, query: str, **kwargs) -> Dict[str, str]:
         """
         Parameters
         ----------
@@ -124,9 +161,9 @@ class HybridSearcher ():
         query : str
             the question you want to ask.
         **kwargs: dict, available keys:
-            - basic_instructions: basic instructions to help the llm to provide a quality answer.
-            - llm: the llm that will be used to generate the answer.
-            - conn: The type of openAI api you use, can be only 'Azure_OpenAI' or 'OpenAI'.
+            - prompt: instructions to help the llm to provide a quality answer.
+            - model: the llm that will be used to generate the answer.
+            - provider: The type provider you use, can be only 'azure_openai' or 'cohere'.
         
         Returns
         -------
@@ -139,26 +176,22 @@ class HybridSearcher ():
         # Access openai configuration from YAML
         updated_config = update_section_with_kwargs(llm_config, **kwargs)
         
-        basic_instructions = updated_config['basic_instructions']
-        llm = updated_config['model']
-        
+        provider = llm_config['provider']
+        prompt = updated_config['prompt']
+        model = updated_config['model']
+        llm_client = LLMClient(provider, model)
         
         contexts = self.search_with_rerank(collection_name, query)
         contexts = str(contexts)
     
-        messages = [{"role": "system", "content": basic_instructions},
+        messages = [{"role": "system", "content": prompt},
                    {"role": "user", "content": "Question: " + query},
                    {"role": "user", "content": "Contexts: " +contexts}]
         
-        api_conn = updated_config['conn']
-        if api_conn == 'Azure_OpenAI': 
-            answer = Azure_OpenAI_api(messages, llm)
-        elif api_conn == 'OpenAI':
-            answer = OpenAI_api(messages, llm)
-        else:
-            raise ValueError ("Your api conn must be 'OpenAI' or 'Azure_OpenAI' depend on your key, please change it in the settings or through config.yaml.")
         
-        qa_dict = {'question': query, 'context': contexts, 'answer': answer}
+        response = llm_client.generate_response(messages)
+        
+        qa_dict = {'question': query, 'context': contexts, 'answer': response}
         
         return qa_dict
         
@@ -166,30 +199,14 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
  
-    q = Qdrant("alon")
-    
-    df = read_and_concatenate(["../data/espn/sample_espn.csv"])
+    q = QdrantCollectionManager()
     
     text_field = "paragraph_text"
-    metadata_fields = ['title','content_publish_date']
-    index_dict = create_index_dict_from_df(df, text_field, metadata_fields)
-
-    client.add(
-        collection_name="alon",
-        documents=index_dict['documents'],
-        metadata=index_dict['metadata'],
-    )  
+    metadata_fields = ['site', 'country', 'title', 'author', 'content_publish_date']
+    input_files = ['../data/espn/espn_stories.csv']
+    q.add_data_to_collection("alon", input_files, text_field, metadata_fields)
     
-    scroll_filter = None  # Define any filtering criteria if needed
-    batch_size = 100  # Number of points to retrieve per request
-    offset = None  # Starting point for scrolling
     
-    response = client.scroll(
-        collection_name="alon",
-        limit=batch_size,
-        offset=offset,
-        )
-    print (len(response[0]))    
 
    
   
