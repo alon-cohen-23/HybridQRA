@@ -140,7 +140,7 @@ if __name__ == '__main__':
     input_files = ['../data/espn/espn_stories.csv']
     
     qdrant = QdrantCollectionManager()
-    qdrant.create_collection("espn_stories_collection")
+    qdrant.create_collection("espn_stories")
     qdrant.add_data_to_collection("espn_stories", input_files,
                                   text_field, metadata_fields)
     
