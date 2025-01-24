@@ -12,6 +12,7 @@ import json
 import pandas as pd
 from typing import List
 
+
 def collect_espn_urls () -> List:
     """
 
@@ -124,6 +125,7 @@ def filter_articles_df (df, min_len = 50) -> pd.DataFrame:
     return df
 
 def main ():
+    
     lis = collect_espn_urls ()
     df = convert_urls_to_df(lis)
     df = filter_articles_df(df)
@@ -132,7 +134,7 @@ def main ():
 
 if __name__ =='__main__':
     df = main ()
-    df.to_csv('espn_stories.csv', index=False)
+    df.to_csv('../data/espn/espn_stories.csv', index=False)
 
    
     

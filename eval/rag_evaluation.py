@@ -1,18 +1,19 @@
 from ragas.llms import LlamaIndexLLMWrapper
 from ragas.embeddings import LlamaIndexEmbeddingsWrapper
-
 from ragas.metrics import faithfulness, answer_correctness, answer_relevancy, context_entity_recall, context_precision, context_recall, context_relevancy
 from ragas import evaluate
 
 from datasets import Dataset
-
 import pandas as pd
 import numpy as np
 import time
 import yaml
 from pathlib import Path
-from src.llm_providers.llama_index_llm import LLMServiceManager
 
+from src.llm_providers.llama_index_llm import LLMServiceManager
+from src.utils.logger import get_logger
+
+logger = get_logger()
 
 
 current_file = Path(__file__)
@@ -111,9 +112,13 @@ def df_evaluation_by_chunk (testset_df:pd.DataFrame ,metrics: list[str], chunks_
     
     eval_dfs =[]
     for df_chunk in dfs:
+        logger.info("Started Evaluating chunk")
+        
         part_eval = df_evaluation(df_chunk, metrics)
         eval_dfs.append(part_eval)
+        
         time.sleep(10)
+        logger.info("Finished Evaluating chunk")
     
     concatenated_eval_df = pd.concat(eval_dfs, ignore_index=True)
     

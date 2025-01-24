@@ -8,9 +8,8 @@ def get_logger():
 
     # File handler with rotation
     file_handler = RotatingFileHandler(
-        "pipeline.log",  # Log file name
+        "pipeline.log",
         maxBytes=5 * 1024 * 1024,  # 5 MB
-        backupCount=3  # Keep 3 backup files
     )
     file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 

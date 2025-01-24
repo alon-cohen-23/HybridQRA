@@ -1,5 +1,6 @@
 from utils.utility_functions import create_index_dict_from_df, read_and_concatenate, convert_search_dict_to_index_dict, update_section_with_kwargs
 from src.llm_providers.llm_connections import LLMClient
+from utils.logger import get_logger
 
 from FlagEmbedding import FlagReranker
 from typing import List, Dict
@@ -9,6 +10,8 @@ from tqdm import tqdm
 
 from pathlib import Path
 import json
+
+logger = get_logger()
 
 current_file = Path(__file__)
 repo_root = current_file.resolve().parent.parent
@@ -61,6 +64,7 @@ class QdrantCollectionManager:
             sparse_vectors_config=self._client.get_fastembed_sparse_vector_params(), 
             on_disk_payload=True
         )
+        logger.info(f"Created {collection_name} successfully.")
         self.collections_input_files[collection_name] = []
         self._save_collections()
     
@@ -83,6 +87,7 @@ class QdrantCollectionManager:
             batch_size=chunk_size
         )  
         files_names = [file_path.split('/')[-1] for file_path in input_files]
+        logger.info(f"Added {files_names} successfully.")
         self.collections_input_files[collection_name].extend(files_names)
         self._save_collections()
     
@@ -91,7 +96,8 @@ class QdrantCollectionManager:
         del self.collections_input_files[collection_name]
         self._client.delete_collection(collection_name=collection_name)
         self._save_collections()
-    
+        logger.info(f"Deleted {collection_name} successfully.")
+        
     def get_collections(self) -> List[str]:
         """Retrieve all collection names."""
         return list(self.collections_input_files.keys())
@@ -213,7 +219,7 @@ if __name__ =='__main__':
     print (searcher.QA_chain("espn_stories", query)['answer'])
     
     
-   
+    
   
     
    

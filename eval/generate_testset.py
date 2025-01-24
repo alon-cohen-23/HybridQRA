@@ -12,12 +12,15 @@ from ragas.testset.evolutions import simple, reasoning, multi_context
 import pandas as pd
 import yaml
 
-#from qdrant_db import HybridSearcher, Qdrant
 from src.utils.utility_functions import docs_list_from_df, read_and_concatenate, update_section_with_kwargs
+from src.utils.logger import get_logger
+
 from src.llm_providers.llama_index_llm import LLMServiceManager
 from src.qdrant_db import HybridSearcher, QdrantCollectionManager
 
 from pathlib import Path
+
+logger = get_logger()
 
 current_file = Path(__file__)
 repo_root = current_file.resolve().parent.parent
@@ -69,6 +72,7 @@ def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fie
         critic_llm,
         embeddings
     )
+    logger.info(f"Started to Generate synthetic ragas df based on f{input_files}.")
     
     # create the testset
     testset = generator.generate_with_llamaindex_docs(
@@ -82,6 +86,8 @@ def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fie
     )
     
     df = testset.to_pandas()
+    logger.info("Generated synthetic ragas df successfully.")
+    
     return df
 
 def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str) -> pd.DataFrame:
@@ -106,6 +112,7 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
                'contexts': [],}
     testset_df = pd.DataFrame(testset)
     
+    logger.info(f"Answering synthetic ragas questions for collection: {collection_name}")
     #Generate an answer to all of the questions from the ragas_df.
     engine = HybridSearcher()
     for index, row in ragas_df.iterrows():
@@ -121,6 +128,7 @@ def rag_answers_to_ragas_questions (ragas_df: pd.DataFrame, collection_name: str
         testset_row_df = pd.DataFrame([testset_row_details])
         testset_df = pd.concat([testset_df, testset_row_df], ignore_index=True)
     
+    logger.info("Finished answering synthetic ragas questions.")
     
     return testset_df
        
