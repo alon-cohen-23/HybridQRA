@@ -37,9 +37,9 @@ llama_index_azure_openai = LLMServiceManager("azure_openai", ragas_models_config
                     ragas_models_config['eval_embeddings'])
 
 # set up generator llm, critic llm and embeddings to create the synthetic testset.    
-generator_llm = llama_index_cohere.llm
-critic_llm = llama_index_azure_openai.llm
-embeddings = llama_index_cohere.embed_model
+generator_llm = llama_index_cohere.get_llm_model()
+critic_llm = llama_index_azure_openai.get_llm_model()
+embeddings = llama_index_cohere.get_embedding_model()
 
 def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fields, **kwargs) -> pd.DataFrame:
     """

@@ -29,8 +29,8 @@ llama_index_azure_openai = LLMServiceManager("azure_openai", ragas_models_config
                                              ragas_models_config['eval_embeddings'])
 
 # set up generator llm, critic llm and embeddings to create the synthetic testset.    
-llm = llama_index_azure_openai.llm
-embeddings = llama_index_azure_openai.embed_model
+llm = llama_index_azure_openai.get_llm_model()
+embeddings = llama_index_azure_openai.get_embedding_model()
 
 
 
@@ -136,14 +136,19 @@ if __name__ =='__main__':
                'context_relevancy']
     
     
-    df = pd.read_csv('../data/testsest/command-r-plus-08-2024_answers2.csv')
-   
-    eval_df = df_evaluation_by_chunk(df, metrics)
-    eval_df.to_csv('command-r-plus-08-2024_answers_results2.csv', index=False)
+    metrics2 = [
+        'context_precision',
+        'context_recall',
+        'context_relevancy'
+        ]
     
-    print (eval_df[metrics].mean())
+    df = pd.read_csv('../data/testsest/command-r-plus-08-2024_answers_results.csv')
+    
+    print (df[metrics2].mean())
     
     
+    
+
         
    
 
