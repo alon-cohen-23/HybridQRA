@@ -12,9 +12,6 @@ class LLMServiceManager:
         self.provider = provider.lower()
         self.llm_model = llm_model
         self.embedding_model = embedding_model
-        self.llm = None
-        self.embed_model = None
-        self.settings = None
         self.input_type = "search_query"  # Default to 'search_query'
         self._initialize_services()
 
@@ -32,8 +29,8 @@ class LLMServiceManager:
         if not api_key:
             raise EnvironmentError("COHERE_API_KEY environment variable not set.")
 
-        self.llm = LlamaIndexCohere(api_key=api_key, model=self.llm_model)
-        self.embed_model = CohereEmbedding(
+        self.llm_model = LlamaIndexCohere(api_key=api_key, model=self.llm_model)
+        self.embedding_model = CohereEmbedding(
             api_key=api_key,
             model_name=self.embedding_model,
             input_type=self.input_type  # Use the dynamic input_type here
@@ -46,24 +43,24 @@ class LLMServiceManager:
         if not all([api_key, endpoint, api_version, self.llm_model]):
             raise EnvironmentError("Azure OpenAI environment variables or deployment name not set.")
 
-        self.llm = LlamaIndexAzureOpenAI(
+        self.llm_model = LlamaIndexAzureOpenAI(
             azure_deployment=self.llm_model,
             api_key=api_key,
             azure_endpoint=endpoint,
             api_version=api_version,
         )
-        self.embed_model = AzureOpenAIEmbedding(
+        self.embedding_model = AzureOpenAIEmbedding(
             azure_deployment=self.embedding_model,
             api_key=api_key,
             azure_endpoint=endpoint,
             api_version=api_version,
         )
 
-    def get_llm(self):
-        return self.llm
+    def get_llm_model(self):
+        return self.llm_model
 
     def get_embedding_model(self):
-        return self.embed_model
+        return self.embedding_model
 
 
     def set_input_type(self, input_type: str):
@@ -75,4 +72,4 @@ class LLMServiceManager:
         self.embed_model.input_type = input_type
 if __name__ == "__main__":
     llama_index_llm = LLMServiceManager("azure_openai", "gpt-4o-sim", "text-embedding-ada-002")
-    print (llama_index_llm.get_llm())
+    print (llama_index_llm.get_llm_model())

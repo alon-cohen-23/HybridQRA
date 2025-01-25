@@ -33,6 +33,7 @@ class AzureOpenAIStrategy(LLMStrategy):
             messages=messages
         )
         return response.choices[0].message.content
+        
 
 # Concrete Strategy for Cohere
 class CohereStrategy(LLMStrategy):
