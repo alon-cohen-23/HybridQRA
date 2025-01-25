@@ -23,10 +23,14 @@ with open(config_path, 'r') as config_file:
 
 qdrant_config = config['qdrant']
 
-client = QdrantClient(qdrant_config['client'])
+
 dense_model = qdrant_config['dense_model']
 sparse_model = qdrant_config['sparse_model']
 chunk_size = qdrant_config['chunk_size']
+
+client = QdrantClient(qdrant_config['client'])
+client.set_model(dense_model)
+client.set_sparse_model(sparse_model)
 
 llm_config = config['llm']
 
@@ -207,17 +211,19 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
  
-    q = QdrantCollectionManager()
+    """q = QdrantCollectionManager()
     
     text_field = "paragraph_text"
     metadata_fields = ['title', 'content_publish_date']
     input_files = ['../data/espn/sample_espn.csv']
-    q.create_collection("alon1")
-    q.add_data_to_collection("alon1", input_files, text_field, metadata_fields)
+    q.create_collection("dekel")
+    q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
+    """
     
     searcher = HybridSearcher()
     query = "How the celtics won NBA chip?"
-    print (searcher.QA_chain("alon3", query)['answer'])
+    print (searcher.QA_chain("dekel", query)['answer'])
+    
     
     
     
