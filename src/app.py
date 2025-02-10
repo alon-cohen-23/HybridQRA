@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from src.qdrant_db import HybridSearcher  # Importing your HybridSearcher class
 from requests.exceptions import RequestException, ConnectionError
 from qdrant_client.http.exceptions import UnexpectedResponse
+from qdrant_client.http.api_client import ResponseHandlingException
+
 
 
 app = Flask(__name__)
@@ -70,10 +72,10 @@ def qa_chain():
 
 
     # Qdrant connection refused
-    except ConnectionRefusedError:
+    except ResponseHandlingException as e:
         return jsonify({
             'status': 'error',
-            'message': "Qdrant Error: Unable to connect to the Qdrant server. Please ensure the Qdrant Docker container is running."
+            'message': f"Qdrant Error: Unable to connect to the Qdrant server. Please ensure the Qdrant Docker container is running. Qdrant response: {str(e)}"
         }), 500
 
     #Qdrant collection not found
@@ -97,16 +99,10 @@ def qa_chain():
         }), 503
 
     except Exception as e:
-        if "DeploymentNotFound" in str(e):
-            return jsonify({
-                'status': 'error',
-                'message': "Azure OpenAI Error: The API deployment does not exist or is not refreshed. If created within the last 5 minutes, please wait and try again."
-            }), 404
-        else:
-            return jsonify({
-                'status': 'error',
-                'message': f"Unexpected Error: {str(e)}"
-            }), 500
+        return jsonify({
+            'status': 'error',
+            'message': f"Unexpected Error: {str(e)}"
+        }), 500
 
 
 if __name__ == '__main__':

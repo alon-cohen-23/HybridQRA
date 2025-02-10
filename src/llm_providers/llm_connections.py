@@ -33,8 +33,8 @@ class AzureOpenAIStrategy(LLMStrategy):
             messages=messages
         )
         return response.choices[0].message.content
+    
         
-
 # Concrete Strategy for Cohere
 class CohereStrategy(LLMStrategy):
     def __init__(self, model: str = "command-r-plus-08-2024"):
@@ -90,7 +90,6 @@ if __name__ == "__main__":
     {"role": "user", "content": "What is the capital of France?"}
     ]
 
-    
     
     
 

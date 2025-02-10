@@ -193,7 +193,7 @@ class HybridSearcher ():
         # Access openai configuration from YAML
         updated_config = update_section_with_kwargs(llm_config, **kwargs)
         
-        provider = llm_config['provider']
+        provider = updated_config['provider']
         prompt = updated_config['prompt']
         model = updated_config['model']
         llm_client = LLMClient(provider, model)
@@ -231,7 +231,8 @@ if __name__ =='__main__':
     #q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
     searcher = HybridSearcher()
     query = "Who helped Tacko Fall and how?"
-    print (searcher.QA_chain("dekel", 121)['answer'])
+
+    print (searcher.QA_chain("dekel", query)['answer'])
     
         
    
