@@ -90,8 +90,7 @@ if __name__ == "__main__":
     {"role": "user", "content": "What is the capital of France?"}
     ]
 
-    client = LLMClient("azure_openai", "gpt-4o-sim")
-    print (client.generate_response(messages))
+    
     
     
 

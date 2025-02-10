@@ -120,6 +120,11 @@ class HybridSearcher ():
     
     def search(self, collection_name: str, query: str, search_limit=qdrant_config['search_limit']) -> List[Dict[str, List[str]]]:
         " query the Qdrant collection and return the top answers based on the limit."
+        if not isinstance(collection_name, str):
+            raise ValueError (f"Error: collection_name should be a string, but got {type(collection_name).__name__}.")
+        if not isinstance(query, str):
+            raise ValueError (f"Error: query should be a string, but got {type(query).__name__}.")
+        
         search_result = client.query(
         collection_name=collection_name,
         query_text=query,
@@ -219,17 +224,17 @@ if __name__ =='__main__':
     q.create_collection("dekel")
     q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
     """
-    
+    text_field = "paragraph_text"
+    metadata_fields = ['title', 'content_publish_date']
+    input_files = ['../data/espn/sample_espn2.csv']
+    q = QdrantCollectionManager()
+    #q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
     searcher = HybridSearcher()
-    query = "How the celtics won NBA chip?"
-    print (searcher.QA_chain("dekel", query)['answer'])
+    query = "Who helped Tacko Fall and how?"
+    print (searcher.QA_chain("dekel", 121)['answer'])
     
-    
-    
-    
-    
-  
-    
+        
+   
    
    
     
