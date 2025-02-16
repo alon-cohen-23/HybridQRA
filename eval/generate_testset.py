@@ -31,15 +31,16 @@ with open(config_path, 'r') as config_file:
 
 ragas_models_config = config['ragas']
 
-llama_index_cohere = LLMServiceManager("cohere", ragas_models_config['generator_llm'],
-                    ragas_models_config['generator_embeddings'])
+"""llama_index_cohere = LLMServiceManager("cohere", ragas_models_config['generator_llm'],
+                    ragas_models_config['generator_embeddings'])"""
 llama_index_azure_openai = LLMServiceManager("azure_openai", ragas_models_config['critic_llm'],
                     ragas_models_config['eval_embeddings'])
 
 # set up generator llm, critic llm and embeddings to create the synthetic testset.    
-generator_llm = llama_index_cohere.get_llm_model()
+generator_llm = llama_index_azure_openai.get_llm_model()
 critic_llm = llama_index_azure_openai.get_llm_model()
-embeddings = llama_index_cohere.get_embedding_model()
+embeddings = llama_index_azure_openai.get_embedding_model()
+
 
 def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fields, **kwargs) -> pd.DataFrame:
     """
@@ -64,7 +65,8 @@ def create_synthetic_ragas_df (input_files : list[str], text_field, metadata_fie
     testset_config = update_section_with_kwargs(testset_config, **kwargs)
     
     # set up the llama_index docs that the synthetic testset will be built on.      
-    df = read_and_concatenate(input_files)
+    #df = read_and_concatenate(input_files)
+    df = pd.read_csv(input_files[0])
     docs = docs_list_from_df(df, text_field, metadata_fields)
     
     generator = TestsetGenerator.from_llama_index(
@@ -137,21 +139,22 @@ if __name__ == '__main__':
     
     text_field = "paragraph_text"
     metadata_fields = ['title', 'content_publish_date']
-    input_files = ['../data/espn/espn_stories.csv']
+    input_files = ['/Users/aloncohen/Documents/HybridQRA/data/espn/sample_espn.csv']
     
-    qdrant = QdrantCollectionManager()
-    qdrant.create_collection("espn_stories")
-    qdrant.add_data_to_collection("espn_stories", input_files,
-                                  text_field, metadata_fields)
-    
-    print ("collection was loaded")
+    """print ("collection was loaded")
     ragas_df_path = "../data/testsest/testset_questions.csv"
     
     ragas_df = pd.read_csv(ragas_df_path)
-    
-    testset_df = rag_answers_to_ragas_questions (ragas_df, "espn_stories")
+    testset_df = create_synthetic_ragas_df (input_files,
+                                            text_field,
+                                            metadata_fields)
     testset_df.to_csv("../data/testsest/command-r-plus-08-2024_answers2.csv", index=False)
+    """
     
+    
+    create_synthetic_ragas_df (input_files,
+                               text_field,
+                               metadata_fields)
     
     
   

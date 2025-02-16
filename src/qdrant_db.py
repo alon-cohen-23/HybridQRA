@@ -6,7 +6,6 @@ from FlagEmbedding import FlagReranker
 from typing import List, Dict
 import yaml
 from qdrant_client import QdrantClient
-from tqdm import tqdm
 
 from pathlib import Path
 import json
@@ -216,26 +215,20 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
  
-    """q = QdrantCollectionManager()
+    q = QdrantCollectionManager()
     
     text_field = "paragraph_text"
     metadata_fields = ['title', 'content_publish_date']
-    input_files = ['../data/espn/sample_espn.csv']
-    q.create_collection("dekel")
-    q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
-    """
-    text_field = "paragraph_text"
-    metadata_fields = ['title', 'content_publish_date']
-    input_files = ['../data/espn/sample_espn2.csv']
-    q = QdrantCollectionManager()
-    #q.add_data_to_collection("dekel", input_files, text_field, metadata_fields)
-    searcher = HybridSearcher()
-    query = "Who helped Tacko Fall and how?"
-
-    print (searcher.QA_chain("dekel", query)['answer'])
+    input_files = ['../data/espn/espn_stories.csv']
+    q.create_collection("ESPN_articles")
+    q.add_data_to_collection("ESPN_articles", input_files, text_field, metadata_fields)
+    
+    
+    
+    
     
         
-   
+    
    
    
     

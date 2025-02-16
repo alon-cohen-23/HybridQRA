@@ -129,11 +129,11 @@ def df_evaluation_by_chunk (testset_df:pd.DataFrame ,metrics: list[str], chunks_
 if __name__ =='__main__':
 
     metrics = [
-               'answer_correctness',
-               'answer_relevancy',
-               'context_precision',
-               'context_recall',
-               'context_relevancy']
+               answer_correctness,
+               answer_relevancy,
+               context_precision,
+               context_recall,
+               context_relevancy]
     
     
     metrics2 = [
@@ -142,9 +142,9 @@ if __name__ =='__main__':
         'context_relevancy'
         ]
     
-    df = pd.read_csv('../data/testsest/command-r-plus-08-2024_answers_results.csv')
+    df = pd.read_csv('../data/testsest/command-r-plus-08-2024_answers.csv')
     
-    print (df[metrics2].mean())
+    df_evaluation(df, metrics)
     
     
     

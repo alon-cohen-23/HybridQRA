@@ -61,7 +61,7 @@ class LLMClient:
                 For Cohere:
                     - model (str): The model name (default: "command-r-plus-08-2024").
         """
-        
+        provider = provider.lower()
 
         if provider == "azure_openai":
             self.strategy = AzureOpenAIStrategy(model)

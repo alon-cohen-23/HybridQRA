@@ -8,3 +8,4 @@ openai_usage.log
 qdrant_storage/
 .env
 *.log
+requirements-eval.txt
