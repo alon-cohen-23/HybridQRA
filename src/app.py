@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 from src.qdrant_db import HybridSearcher  # Importing your HybridSearcher class
 from requests.exceptions import RequestException, ConnectionError
 from qdrant_client.http.exceptions import UnexpectedResponse
@@ -7,7 +9,7 @@ from qdrant_client.http.api_client import ResponseHandlingException
 
 
 app = Flask(__name__)
-
+CORS(app)
 # Initialize the HybridSearcher
 searcher = HybridSearcher()
 
