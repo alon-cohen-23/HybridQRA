@@ -9,6 +9,7 @@ from qdrant_client import QdrantClient
 
 from pathlib import Path
 import json
+import os
 
 logger = get_logger()
 
@@ -26,8 +27,10 @@ qdrant_config = config['qdrant']
 dense_model = qdrant_config['dense_model']
 sparse_model = qdrant_config['sparse_model']
 chunk_size = qdrant_config['chunk_size']
+client_url = os.getenv("QDRANT_URL", qdrant_config['client'])
 
-client = QdrantClient(qdrant_config['client'])
+
+client = QdrantClient(client_url)
 client.set_model(dense_model)
 client.set_sparse_model(sparse_model)
 
@@ -222,6 +225,8 @@ if __name__ =='__main__':
     input_files = ['../data/espn/espn_stories.csv']
     q.create_collection("ESPN_articles")
     q.add_data_to_collection("ESPN_articles", input_files, text_field, metadata_fields)
+    
+    
     
     
     
