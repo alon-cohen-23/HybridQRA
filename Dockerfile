@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
    
-# Copy requirements files
-COPY requirements.txt requirements.txt
+# Copy requirements file
+COPY requirements-docker.txt requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -30,5 +30,4 @@ RUN mkdir -p data
 EXPOSE 5002
 
 # Command to run the application
-CMD ["python", "src/app.py"]
-
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5002", "src.app:app"]
