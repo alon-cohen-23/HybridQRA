@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 
 from src.qdrant_db import HybridSearcher  # Importing your HybridSearcher class
 from requests.exceptions import RequestException, ConnectionError
@@ -7,9 +10,15 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.http.api_client import ResponseHandlingException
 
 
-
 app = Flask(__name__)
 CORS(app)
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["5 per hour"],  # This limits each IP to 5 requests per hour
+)
+
 # Initialize the HybridSearcher
 searcher = HybridSearcher()
 
@@ -108,4 +117,4 @@ def qa_chain():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=5002)
+    app.run(host='0.0.0.0', port=5002)

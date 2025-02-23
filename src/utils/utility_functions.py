@@ -48,6 +48,8 @@ def create_index_dict_from_df (docs_df: pd.DataFrame(), text_field: str, metadat
     Parameters
     ----------
     docs_df : df that contains the text and the metadata columns.
+    metadata_fields: list, the fields that will be used for the metadata of the qdrant docs.
+    text_field: str, the field that will be used for the text of the qdrant docs.
     
     Returns
     -------
