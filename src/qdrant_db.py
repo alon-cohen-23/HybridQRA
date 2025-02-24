@@ -159,7 +159,13 @@ class HybridSearcher ():
         """
         
         raw_contexts = self.search(collection_name,query)
-        documents_for_rerank = [str(item) for item in raw_contexts]
+        
+        documents_for_rerank = []
+        for context in raw_contexts:
+            document_str = str(context)
+            document_str = document_str.replace('\\' , "")
+            documents_for_rerank.append(document_str)
+            
        
         response = co.rerank(
             model="rerank-v3.5",
@@ -170,7 +176,10 @@ class HybridSearcher ():
         
         reranked_docs = []
         for result in response.results:
-            reranked_docs.append(documents_for_rerank[result.index])
+            doc_string = documents_for_rerank[result.index].replace('\\' , "")
+            reranked_docs.append(doc_string)
+        
+        
         return reranked_docs    
             
       
@@ -205,15 +214,13 @@ class HybridSearcher ():
         llm_client = LLMClient(provider, model)
         
         contexts = self.search_with_rerank(collection_name, query)
-        contexts = str(contexts)
+        
     
         messages = [{"role": "system", "content": prompt},
                    {"role": "user", "content": "Question: " + query},
-                   {"role": "user", "content": "Contexts: " +contexts}]
-        
+                   {"role": "user", "content": contexts}]
         
         response = llm_client.generate_response(messages)
-        
         qa_dict = {'question': query, 'context': contexts, 'answer': response}
         
         return qa_dict
@@ -222,9 +229,10 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
  
+    
     searcher = HybridSearcher()
     answer = searcher.QA_chain("ESPN_articles", 
-                "Why Tatum hid the fact that he was about to become a father?")
+                "tell me what you know about how Brad Stevens helped tacko fall?")
     print (answer['answer'])
     
     
