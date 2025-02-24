@@ -12,7 +12,8 @@ from ragas.testset.evolutions import simple, reasoning, multi_context
 import pandas as pd
 import yaml
 
-from src.utils.utility_functions import docs_list_from_df, read_and_concatenate, update_section_with_kwargs
+from src.utils.utility_functions import read_and_concatenate, update_section_with_kwargs
+from src.utils.llama_index_utils import docs_list_from_df
 from src.utils.logger import get_logger
 
 from src.llm_providers.llama_index_llm import LLMServiceManager
