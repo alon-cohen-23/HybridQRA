@@ -2,15 +2,17 @@ from src.utils.utility_functions import create_index_dict_from_df, read_and_conc
 from src.llm_providers.llm_connections import LLMClient
 from src.utils.logger import get_logger
 
-from FlagEmbedding import FlagReranker
+import cohere
 from typing import List, Dict
 import yaml
 from qdrant_client import QdrantClient
+from dotenv import load_dotenv
 
 from pathlib import Path
 import json
 import os
 
+load_dotenv()
 logger = get_logger()
 
 current_file = Path(__file__)
@@ -115,8 +117,9 @@ class QdrantCollectionManager:
     
             
         
-reranker = FlagReranker(qdrant_config['reranker'], qdrant_config['reranker_use_fp16']) 
-        
+
+co = cohere.ClientV2(api_key=os.environ['COHERE_API_KEY'])
+
 class HybridSearcher ():
     
     
@@ -132,7 +135,7 @@ class HybridSearcher ():
         query_text=query,
         query_filter=None,  
         limit=search_limit,  
-    )
+        )
         
         
         retrieved_answers = [hit.metadata for hit in search_result]
@@ -151,24 +154,25 @@ class HybridSearcher ():
         Returns
         -------
         rellevant_contexts: List
-        the top 3 paragraphs sorted in a descending oreder based
-        on the score of the bge-reranker-v2-m3 reranking model.
+        the top 5 paragraphs sorted in a descending oreder based
+        on the score of the cohere's rerank-v3.5 reranking model.
         """
         
         raw_contexts = self.search(collection_name,query)
+        documents_for_rerank = [str(item) for item in raw_contexts]
+       
+        response = co.rerank(
+            model="rerank-v3.5",
+            query="What is the capital of the United States?",
+            documents=documents_for_rerank,
+            top_n=5,
+        )
         
-        # Compute scores for each context
-        scores = [reranker.compute_score([query, str(item)], normalize=True) for item in raw_contexts]
-        
-        scored_texts = list(zip(scores, raw_contexts))
-        
-        #Sort the list of tuples by score in descending order
-        sorted_scored_texts = sorted(scored_texts, key=lambda x: x[0], reverse=True)
-        
-        sorted_texts = [text for score, text in sorted_scored_texts]
-        rellevant_contexts = sorted_texts[:reranker_limit]
-        
-        return rellevant_contexts
+        reranked_docs = []
+        for result in response.results:
+            reranked_docs.append(documents_for_rerank[result.index])
+        return reranked_docs    
+            
       
     
     def QA_chain (self, collection_name: str, query: str, **kwargs) -> Dict[str, str]:
@@ -218,13 +222,11 @@ class HybridSearcher ():
         
 if __name__ =='__main__':
  
-    q = QdrantCollectionManager()
+    searcher = HybridSearcher()
+    answer = searcher.QA_chain("ESPN_articles", 
+                "Why Tatum hid the fact that he was about to become a father?")
+    print (answer['answer'])
     
-    text_field = "paragraph_text"
-    metadata_fields = ['title', 'content_publish_date']
-    input_files = ['../data/espn/espn_stories.csv']
-    q.create_collection("ESPN_articles")
-    q.add_data_to_collection("ESPN_articles", input_files, text_field, metadata_fields)
     
     
     
