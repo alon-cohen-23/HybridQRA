@@ -1,6 +1,6 @@
 # HybridQRA
 
- HybridQRA is a Retrieval-Augmented Generation (RAG) engine that leverages the Qdrant vector database to enable hybrid search, combining both dense vectors (based on semantic similarity) and sparse vectors (based on keyword search).  To answer a given question, the vector database is queried to retrieve the most relevant contexts from the documents. These contexts are then re-ranked using cohere's "rerank-v3.5" model, and only the highest-ranking paragraph is forwarded to the large language model (LLM) for precise and accurate question-answering. The entire project, including the website and chat UI, was containerized using Docker and deployed on AWS. <br>
+ HybridQRA is a Retrieval-Augmented Generation (RAG) engine that leverages the Qdrant vector database to enable hybrid search, combining both dense vectors (based on semantic similarity) and sparse vectors (based on keyword search).  To answer a given question, the vector database is queried to retrieve the most relevant contexts from the documents. These contexts are then re-ranked using cohere's "rerank-v3.5" model, and only the highest-ranking paragraph is forwarded to the large language model (LLM) for precise question-answering. The entire project, including the website and chat UI, was containerized using Docker and deployed on AWS. <br> <br>
  <strong>Feel Free to check out Hybridqra website:</strong> 
  <a href="http://51.20.19.95/" style="color: blue;">http://51.20.19.95/</a>
 
