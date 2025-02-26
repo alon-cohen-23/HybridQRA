@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import os
 
 
 from src.qdrant_db import HybridSearcher  # Importing your HybridSearcher class
@@ -9,14 +10,16 @@ from requests.exceptions import RequestException, ConnectionError
 from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.http.api_client import ResponseHandlingException
 
+secret_key = os.urandom(24).hex()
 
 app = Flask(__name__)
+app.secret_key = secret_key
 CORS(app)
 
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
-    default_limits=["5 per hour"],  # This limits each IP to 5 requests per hour
+    default_limits=["100 per hour"],  # This limits each IP to 100 requests per hour
 )
 
 # Initialize the HybridSearcher
@@ -35,6 +38,9 @@ def qa_chain():
         "provider": "cohere" or "azure_openai"
     }
     """
+    user_limit = limit_user_requests()
+    if user_limit:
+        return user_limit
     try:
         # Retrieve data from the request
         data = request.get_json()
@@ -115,6 +121,19 @@ def qa_chain():
             'message': f"Unexpected Error: {str(e)}"
         }), 500
 
+def limit_user_requests():
+    # Check if the request counter exists for the user; if not, initialize it
+    if 'user_request_count' not in session:
+        session['user_request_count'] = 0
+
+    # Increment the user's request count
+    session['user_request_count'] += 1
+    session.modified = True
+
+    # Check if the user has exceeded their limit
+    if session['user_request_count'] > 5:
+        # Return the error response here
+        return jsonify({"Error": "Request limit exceeded. Every user is limited to 5 requests."}), 429
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002)
