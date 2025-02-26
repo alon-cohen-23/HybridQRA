@@ -30,4 +30,4 @@ RUN mkdir -p data
 EXPOSE 5002
 
 # Command to run the application
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5002", "src.app:app"]
+CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:5002", "src.app:app"]

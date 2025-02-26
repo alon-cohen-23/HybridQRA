@@ -168,7 +168,7 @@ class HybridSearcher ():
             
        
         response = co.rerank(
-            model="rerank-v3.5",
+            model=qdrant_config['reranker'],
             query="What is the capital of the United States?",
             documents=documents_for_rerank,
             top_n=5,
@@ -232,7 +232,7 @@ if __name__ =='__main__':
     
     searcher = HybridSearcher()
     answer = searcher.QA_chain("ESPN_articles", 
-                "tell me what you know about how Brad Stevens helped tacko fall?")
+                "Why Tatum hid the fact that he was about to become a father?")
     print (answer['answer'])
     
     
