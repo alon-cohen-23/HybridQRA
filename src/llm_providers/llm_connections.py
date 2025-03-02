@@ -11,7 +11,7 @@ load_dotenv()
 # Abstract Strategy Interface
 class LLMStrategy(ABC):
     @abstractmethod
-    def generate_response(self, messages: list) -> str:
+    def generate_response(self, messages: list, temperature: float) -> str:
         pass
 
 # Concrete Strategy for Azure OpenAI
@@ -24,13 +24,14 @@ class AzureOpenAIStrategy(LLMStrategy):
             api_version = os.environ['AZURE_OPENAI_API_VERSION'],
         )
 
-    def generate_response(self, messages: list) -> str:
+    def generate_response(self, messages: list, temperature=0) -> str:
         url = str(self.client.base_url)
         azure_deployment = url.rstrip('/').split('/')[-1]
         
         response = self.client.chat.completions.create(
             model=azure_deployment,
-            messages=messages
+            messages=messages,
+            temperature=temperature
         )
         return response.choices[0].message.content
     
@@ -41,11 +42,13 @@ class CohereStrategy(LLMStrategy):
         self.client = cohere.ClientV2(api_key=os.environ['COHERE_API_KEY'])
         self.model = model
 
-    def generate_response(self, messages: list) -> str:
+    def generate_response(self, messages: list, temperature=0) -> str:
         response = self.client.chat(
             model=self.model,
-            messages = messages
+            messages = messages,
+            temperature=temperature,
         )
+        
         return response.message.content[0].text.strip()
 
 class LLMClient:
